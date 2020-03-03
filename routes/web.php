@@ -11,6 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'HomeController@index')->name('home');
+Route::get('/create', 'RequestLogController@create')->name('logs.form.create');
+Route::get('/update/{id}', 'RequestLogController@updateForm')->name('logs.form.update');
+Route::get('/info/{id}', 'RequestLogController@get')->name('logs.show');

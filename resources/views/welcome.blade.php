@@ -1,100 +1,81 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.app')
 
-        <title>Laravel</title>
-
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
-
-        <!-- Styles -->
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Nunito', sans-serif;
-                font-weight: 200;
-                height: 100vh;
-                margin: 0;
-            }
-
-            .full-height {
-                height: 100vh;
-            }
-
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
-
-            .position-ref {
-                position: relative;
-            }
-
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
-            .content {
-                text-align: center;
-            }
-
-            .title {
-                font-size: 84px;
-            }
-
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 13px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
-
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}">Register</a>
-                        @endif
-                    @endauth
+@section('content')
+    <div class="container" style="max-width: 90%;">
+        <div class="row justify-content-center">
+            <div class="card" style="max-width: 100%;">
+                <div class="card-header">Logs List</div>
+                <div class="list-button">
+                    <a href="{{ route('logs.form.create') }}" class="btn btn-success">Add new log</a>
                 </div>
-            @endif
-
-            <div class="content">
-                <div class="title m-b-md">
-                    Laravel
-                </div>
-
-                <div class="links">
-                    <a href="https://laravel.com/docs">Docs</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://blog.laravel.com">Blog</a>
-                    <a href="https://nova.laravel.com">Nova</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://vapor.laravel.com">Vapor</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
-                </div>
+                <table class="table table-borderless" width="80%" id="logs-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Action</th>
+                        <th>Method</th>
+                        <th>IP</th>
+                        <th>City</th>
+                        <th>Country</th>
+                        <th>Type</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
             </div>
         </div>
-    </body>
-</html>
+    </div>
+    <script>
+        function deleteLog(id) {
+            $.ajax({
+                type: 'DELETE',
+                url: `/api/logs/${id}`,
+                success: () => {
+                    getLogs();
+                },
+            })
+        }
+
+        function getLogs() {
+            $.ajax({
+                type: 'GET',
+                url: "{{ route('logs.list') }}",
+                success: showLogs,
+            })
+        }
+
+        function showLogs(response) {
+            if (response) {
+                $("#logs-table > tbody").empty();
+                response.data.map(item => {
+                    $("#logs-table > tbody").append(
+                        "<tr>" +
+                        `   <td>${item.id}</td>` +
+                        `   <td>${item.action}</td>` +
+                        `   <td>${item.method}</td>` +
+                        `   <td>${item.ip}</td>` +
+                        `   <td>${item.city}</td>` +
+                        `   <td>${item.country}</td>` +
+                        `   <td>${item.type}</td>` +
+                        `   <td>${item.created_at}</td>` +
+                        "   <td>" +
+                        "      <div>" +
+                        `          <button style='display: inline; float: left;' class="btn btn-danger" onclick=deleteLog(${item.id})>Delete</button>` +
+                        `          <a style='display: inline; float: left;' href="/update/${item.id}" class="btn btn-warning">Update</a>` +
+                        `          <a style='display: inline; float: left;' href="/info/${item.id}" class="btn btn-info">Details</a>` +
+                        "      </div>" +
+                        "   </td>" +
+                        "</tr>"
+                    );
+                });
+            }
+        }
+
+        $(document).ready(function () {
+            getLogs();
+        });
+    </script>
+@endsection
